@@ -7,153 +7,166 @@ const CARROT = "^";
 const PLAYER = "*";
 
 // WIN / LOSE / OUT / QUIT messages constants
-const WIN = "";                                                                 // TODO: customise message when player wins
-const LOST = "";                                                                // TODO: customise message when player lose
-const OUT = "";                                                                 // TODO: customise message when player is out of bounds (lose)
-const QUIT = "Thank you. You quit the game";                                    // TODO: customise message when player quits
+const WIN = "Fuiyoh! You have found the CARROT! Congratulations!";
+const LOST = "Haiya! You have fallen into a HOLE! Try again?";
+const OUT = "Haiya! You have went out of the map! Try again?";
+const QUIT = "Alamak!. You quit the game";
 
-// MAP ROWS, COLUMNS AND PERCENTAGE
-const ROWS = 8;                                                                 // the game map will have 8 rows
-const COLS = 5;                                                                 // the game map will have 5 cols
-const PERCENT = .2;                                                             // % of holes for the map
+// MAP ROWS, COLUMNS, AND PERCENTAGE
+const ROWS = 8; // the game map will have 8 rows
+const COLS = 5; // the game map will have 5 cols
+const PERCENT = 0.2; // % of holes for the map will be 80:20
 
-class Field{
+class Field {
 
-    // create the constructor
-    constructor(field = [[]]){
-        this.field = field;                                                     // this.field is a property of the class Field 
-        this.gamePlay = false;                                                  // when the game is instantiated, the gamePlay is false
+
+  // create the constructor (FIELD)    
+    constructor(field = [[]]) {
+        this.field = field; // this.field is a property of the class Field
+        this.gamePlay = false; // when the game is instantiated, the gamePlay is false
+        this.playerPosition = { HORI: 0, VERT: 0 }; // Initialize player position at the top left corner
     }
 
-    static welcomeMsg(msg){                                                     // static Method to show game's welcome message
+    // Static Welcome message after initiation
+    static welcomeMsg(msg) {
         console.log(msg);
     }
 
-    static generateField(rows, cols, percentage) {                              // static method that generates and return a 2D map   
-        const map = [[]];
+    // FIELD is RANDOMLY generated using FOR LOOP, where MATH.RANDOM determines GRASS:HOLE
+    static generateField(rows, cols, percentage) {
+        const map = []; // Corrected the initialization of the map
 
-        for (let i = 0; i < rows; i++) {                                        // create the map with 8 rows
-            map[i] = [];                                                        // each row will have 5 cols
+        for (let i = 0; i < rows; i++) { // create the map with 8 rows
+            map[i] = []; // each row will have 5 cols
             for (let j = 0; j < cols; j++) {
-                map[i][j] = Math.random() > percentage ? GRASS : HOLE;          // per col in each row, we generate grass(80%)/hole(20%)
+                map[i][j] = Math.random() > percentage ? GRASS : HOLE; // generate grass(80%)/hole(20%)
             }
         }
 
         return map;
     }
 
-    printField(){                                                               // print the game field (used to update during gameplay)       
+    // RANDOMLY generated FIELD is printed (console.log)
+    // print the game field (used to update during gameplay) 
+    printField() {                                        
         this.field.forEach(element => {
-            console.log(element.join(""));
+            console.log(element.join("  "));
         });
     }
 
-    updateGame(input){                                                          // TODO: Refer to details in the method's codeblock
+    // const for CARROT is RANDOMLY planted in FIELD 
+    //plantCarrot function
+    plantCarrot() {
+        let HORI, VERT;
+        do {
+            HORI = Math.floor(Math.random() * 8); // Generates a random integer between 0 and 7
+            VERT = Math.floor(Math.random() * 5); // Generates a random integer between 0 and 4
+        } while (this.field[HORI][VERT] === PLAYER); // Ensure carrot is not placed on the player
 
-      const userInput = String(input).toLowerCase();
-        
-        /*   
-        TODO: 1. if the user arrives at the carrot
-        end the game - set gamePlay = false;
-        inform the user that he WIN the game 
-        */
-
-        /* 
-        TODO: 2. if the user arrives at the hole
-        end the game - set the gamePlay = false;
-        inform the user that he LOST the game
-        */
-
-        /*  
-        TODO: 3. if the user exits out of the field
-        end the game - set the gamePlay = false;
-        inform the user that he step OUT of the game
-        */
-
-        /*  
-        4. if the user ends the game
-        end the game - set the gamePlay = false;
-        inform the user that he QUIT the game
-        */
-        if(userInput === "q"){
-            this.quitGame();
-        }
-
-        /* 
-        TODO: 5. otherwise, move player on the map: this.field[rowindex][colindex] = PLAYER;
-        update this.field to show the user had moved to the new area on map
-        */
+        this.field[HORI][VERT] = CARROT; // Place the carrot
     }
 
-    plantCarrot(){
-        // TODO: plant the carrot by randomizing the X and Y location in the form of variables
-        const X = Math.floor(Math.random() * (ROWS - 1)) + 1;
-        const Y = Math.floor(Math.random() * (COLS - 1)) + 1;   
-        this.field[X][Y] = CARROT;
-        console.log(X, Y);
-    }
+    // When game is STARTED, the following objects below:
 
-    startGame(){                                                                
-        this.gamePlay = true;                                                   // set this.gamePlay = true to keep the game running
+    startGame() {
+        this.gamePlay = true; // set this.gamePlay = true to keep the game running
 
-        this.field[0][0] = PLAYER;                                              // at the start of the game, we insert the player;
+        // PLAYER is inserted at [0][0]
+        this.field[0][0] = PLAYER; 
 
-        this.plantCarrot();                                                     // plant the carrot manually, or use a Method
+        // CARROT function is planted via method (Refer to code above)
+        this.plantCarrot();
 
-        while(this.gamePlay){                                                   // while the gamePlay is happening                                          
+        //FIELD is generated (Per above)
 
-            this.printField();                                                  // show the map each time a move is requested
 
-            let flagInvalid = false;                                            // flag to check if any invalid input is entered
-            console.log("(u)p, (d)own, (l)eft, (r)ight, (q)uit");               // provide instruction for player to move
-            const input = prompt("Which way: ");                                // obtain the user's direction (up, down, left right, quit)
+         //DO WHILE LOOP is in play (gameplay happening)
+         
+        while (this.gamePlay) {
+            this.printField(); // show the map each time a move is requested
 
-            switch (input.toLowerCase()) {                                      // acknowledging the user's input
+            let flagInvalid = false; // flag to check if any invalid input is entered
+            console.log("(u)p, (d)own, (l)eft, (r)ight, (q)uit"); // provide instruction for player to move
+            const input = prompt("Which way: "); // obtain the user's direction (up, down, left right, quit)
+
+            switch (input.toLowerCase()) { // acknowledging the user's input
                 case "u":
-                    console.log("up");
+                    this.playerPosition.HORI -= 1; // Move up
                     break;
                 case "d":
-                    console.log("down");
+                    this.playerPosition.HORI += 1; // Move down
                     break;
                 case "l":
-                    console.log("left");
+                    this.playerPosition.VERT -= 1; // Move left
                     break;
                 case "r":
-                    console.log("right");
+                    this.playerPosition.VERT += 1; // Move right
                     break;
                 case "q":
-                    console.log("quit");
-                    break;
+                    this.quitGame();
+                    return;
                 default:
                     console.log("Invalid input");
-                    flagInvalid = !flagInvalid;
+                    flagInvalid = true;
                     break;
             }
 
-            if(!flagInvalid){                                                   // only if flagInvalid is false, then update game
-                this.updateGame(input);
+            if (!flagInvalid) {
+                this.updateGame();
             }
+        }
+    }
 
+    // Updates the game after WHILE LOOP is executed (WHILE IN PLAY)
+
+    //ASSIGNMENT
+    updateGame() {
+        let { HORI, VERT } = this.playerPosition;
+
+        // Check boundaries to make sure the new position is within the field
+        if (HORI < 0 || HORI >= ROWS || VERT < 0 || VERT >= COLS) {
+            console.log(OUT);
+            this.gamePlay = false;
+            return;
         }
 
+        // Check for carrot
+        if (this.field[HORI][VERT] === CARROT) {
+            this.gamePlay = false;
+            console.log(WIN);
+            return;
+        }
+
+        // Check for hole
+        if (this.field[HORI][VERT] === HOLE) {
+            this.gamePlay = false;
+            console.log(LOST);
+            return;
+        }
+
+        // Clear previous position and update the new position with player symbol
+        this.field.forEach(row => row.fill(GRASS, row.indexOf(PLAYER), row.indexOf(PLAYER) + 1)); // Clear old position
+        this.field[HORI][VERT] = PLAYER;
+
+        console.log('Continue playing...');
     }
 
-    endGame(){                                                                  
-        this.gamePlay = false;                                                  // set property gamePlay to false
-        process.exit();                                                         // end the Node app
+    // Ending the game
+    endGame() {
+        this.gamePlay = false; // set property gamePlay to false
+        process.exit(); // end the Node app
     }
 
-    quitGame(){
+    quitGame() {
         console.log(QUIT);
         this.endGame();
     }
-
 }
 
 // Instantiate a new instance of Field Class
-const createField = Field.generateField(ROWS, COLS, PERCENT);                   // call Field's class static method to generate 2D field                
+const createField = Field.generateField(ROWS, COLS, PERCENT);
 const gameField = new Field(createField);
 
-Field.welcomeMsg("Welcome to Find Your Hat!\n**************************************************\\n");
-
+Field.welcomeMsg("Welcome to Find Uncle Roger's Carrot Seasoned with MSG!!\n*********************************************\n");
+Field.welcomeMsg("Find the seasoned carrot in the field but avoid the holes!");
 gameField.startGame();
